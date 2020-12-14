@@ -3,6 +3,7 @@
 import sys
 
 ADD = 0b10100000  # ALU
+AND = 0b10101000  # ALU
 CALL = 0b01010000
 CMP = 0b10100111  # ALU
 HLT = 0b00000001
@@ -10,11 +11,17 @@ JEQ = 0b01010101
 JMP = 0b01010100
 JNE = 0b01010110
 LDI = 0b10000010
+MOD = 0b10100100  # ALU
 MUL = 0b10100010  # ALU
+NOT = 0b01101001  # ALU
+OR = 0b10101010  # ALU
 POP = 0b01000110
 PRN = 0b01000111
 PUSH = 0b01000101
 RET = 0b00010001
+SHL = 0b10101100  # ALU
+SHR = 0b10101101  # ALU
+XOR = 0b10101011  # ALU
 SP = 7  # initial stack pointer
 
 
@@ -70,10 +77,10 @@ class CPU:
         if instruction == ADD:
             self.reg[reg_a] += self.reg[reg_b]
 
-        # Multiply the values in two registers together
-        # and store the result in registerA.
-        elif instruction == MUL:
-            self.reg[reg_a] *= self.reg[reg_b]
+        # Bitwise-AND the values in registerA and registerB,
+        # then store the result in registerA.
+        elif instruction == AND:
+            self.reg[reg_a] &= self.reg[reg_b]
 
         # Compare the values in two registers.
         elif instruction == CMP:
@@ -83,6 +90,46 @@ class CPU:
                 self.fl = 0b00000010
             else:
                 self.fl = 0b00000001
+
+        # Divide the value in the first register by the value in the second,
+        # storing the remainder of the result in registerA.
+        # If the value in the second register is 0,
+        # the system should print an error message and halt.
+        elif instruction == MOD:
+            if self.reg[reg_b] == 0:
+                self.hlt(reg_a, reg_b)
+            else:
+                self.reg[reg_a] = self.reg[reg_a] % self.reg[reg_b]
+
+        # Multiply the values in two registers together
+        # and store the result in registerA.
+        elif instruction == MUL:
+            self.reg[reg_a] *= self.reg[reg_b]
+
+        # Perform a bitwise-NOT on the value in a register,
+        # storing the result in the register.
+        elif instruction == NOT:
+            self.reg[reg_a] = ~self.reg[reg_a]
+
+        # Perform a bitwise-OR between the values in registerA and registerB,
+        # storing the result in registerA.
+        elif instruction == OR:
+            self.reg[reg_a] |= self.reg[reg_b]
+
+        # Shift the value in registerA left by the number of bits specified in registerB,
+        # filling the low bits with 0.
+        elif instruction == SHL:
+            self.reg[reg_a] <<= self.reg[reg_b]
+
+        # Shift the value in registerA right by the number of bits specified in registerB,
+        # filling the high bits with 0.
+        elif instruction == SHR:
+            self.reg[reg_a] >>= self.reg[reg_b]
+
+        # Perform a bitwise-XOR between the values in registerA and registerB,
+        # storing the result in registerA.
+        elif instruction == XOR:
+            self.reg[reg_a] ^= self.reg[reg_b]
 
         else:
             raise Exception("Unsupported ALU operation")
